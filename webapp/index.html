@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta name="theme-color" content="#080b16">
+
+    <title>Konkurs_uzbot</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        d="M21 4.5 17.8 19c-.24 1.03-.84 1.29-1.7.8l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.34-4.78 8.7-7.86c.38-.34-.08-.53-.59-.19L6.01 12.82l-4.62-1.45c-1-.31-1.02-1 .21-1.48L19.65 3.1C20.56 2.77 21.36 3.3 21 4.5Z"
+                    />
+                </svg>
+            </div>
+
+            <div>
+                <div class="brand-title">Konkurs_uzbot</div>
+                <div class="brand-subtitle">Telegram konkurslar</div>
+            </div>
+
+        </div>
+
+        <div class="header-status">
+            <span class="status-dot"></span>
+            Online
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- HOME -->
+        <section
+            class="page"
+            id="home-page"
+        >
+
+            <div class="welcome-block">
+
+                <div class="welcome-eyebrow">
+                    PREMIUM CONTEST SYSTEM
+                </div>
+
+                <h1>
+                    Konkurslarni
+                    <span>oson boshqaring</span>
+                </h1>
+
+                <p>
+                    Telegram konkurslarini yaratish,
+                    rejalashtirish va boshqarish bir joyda.
+                </p>
+
+            </div>
+
+
+            <div class="home-actions">
+
+                <button
+                    class="action-card"
+                    data-page="create"
+                    type="button"
+                >
+
+                    <div class="action-icon blue-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                    </div>
+
+                    <div class="action-content">
+                        <strong>Konkurs yaratish</strong>
+                        <span>Yangi Telegram konkursi yarating</span>
+                    </div>
+
+                    <div class="action-arrow">
+                        <svg viewBox="0 0 24 24">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </div>
+
+                </button>
+
+
+                <button
+                    class="action-card"
+                    data-page="my-contests"
+                    type="button"
+                >
+
+                    <div class="action-icon purple-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect
+                                x="4"
+                                y="4"
+                                width="16"
+                                height="16"
+                                rx="3"
+                            />
+                            <path d="M8 9h8M8 13h8M8 17h5"/>
+                        </svg>
+                    </div>
+
+                    <div class="action-content">
+                        <strong>Konkurslarim</strong>
+                        <span>O'zingiz yaratgan konkurslar</span>
+                    </div>
+
+                    <div class="action-arrow">
+                        <svg viewBox="0 0 24 24">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </div>
+
+                </button>
+
+            </div>
+
+
+            <div class="home-info">
+
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 10v6M12 7h.01"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <strong>Hammasi bitta joyda</strong>
+                    <p>
+                        Konkurs yaratishdan tortib
+                        g'oliblarni boshqarishgacha.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CREATE -->
+        <section
+            class="page"
+            id="create-page"
+            hidden
+        >
+
+            <div class="page-header">
+
+                <button
+                    class="back-icon-button"
+                    data-page="home"
+                    type="button"
+                    aria-label="Orqaga"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+
+                <div class="page-header-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h2>Konkurs yaratish</h2>
+                    <p>Konkurs ma'lumotlarini kiriting</p>
+                </div>
+
+            </div>
+
+
+            <form id="contest-form" class="contest-form">
+
+                <!-- TARGET CHANNEL -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21 4.5 17.8 19c-.24 1.03-.84 1.29-1.7.8l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.34-4.78 8.7-7.86c.38-.34-.08-.53-.59-.19L6.01 12.82l-4.62-1.45c-1-.31-1.02-1 .21-1.48L19.65 3.1C20.56 2.77 21.36 3.3 21 4.5Z"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Konkurs kanali</strong>
+                            <span>Konkurs qaysi kanalga joylanadi</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="input-wrapper">
+
+                        <input
+                            type="text"
+                            id="target-channel-input"
+                            class="text-input"
+                            placeholder="@kanal_nomi"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                    <div class="input-hint">
+                        @username · username · t.me/username · Telegram ID
+                    </div>
+
+
+                    <div
+                        id="target-channel-result"
+                        class="resolved-result hidden"
+                    ></div>
+
+                </div>
+
+
+                <!-- POST -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M5 5h14v14H5z"/>
+                                <path d="M8 15l2.5-3 2 2 1.5-2 2 3"/>
+                                <circle cx="9" cy="9" r="1"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Konkurs posti</strong>
+                            <span>Kanalga yuboriladigan post</span>
+                        </div>
+
+                    </div>
+
+
+                    <textarea
+                        id="post-text"
+                        class="text-input textarea-input"
+                        rows="6"
+                        placeholder="Konkurs haqida ma'lumot yozing..."
+                    ></textarea>
+
+
+                    <!-- IMAGE -->
+                    <div class="image-upload-box">
+
+                        <input
+                            type="file"
+                            id="post-image-input"
+                            accept="image/*"
+                            hidden
+                        >
+
+                        <label
+                            for="post-image-input"
+                            class="image-upload-button"
+                        >
+
+                            <div class="upload-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="16"
+                                        rx="3"
+                                    />
+                                    <circle
+                                        cx="8.5"
+                                        cy="9"
+                                        r="1.5"
+                                    />
+                                    <path d="m4 17 5-5 3 3 2-2 6 5"/>
+                                </svg>
+                            </div>
+
+                            <div>
+                                <strong>Gallerydan rasm tanlash</strong>
+                                <span>JPG, PNG yoki WEBP</span>
+                            </div>
+
+                        </label>
+
+
+                        <div
+                            id="image-preview-box"
+                            class="image-preview-box hidden"
+                        >
+
+                            <img
+                                id="post-image-preview"
+                                src=""
+                                alt="Post rasmi"
+                            >
+
+                            <button
+                                type="button"
+                                id="remove-image"
+                                class="remove-image-button"
+                            >
+                                <svg viewBox="0 0 24 24">
+                                    <path d="m6 6 12 12M18 6 6 18"/>
+                                </svg>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REQUIRED CHANNELS -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"/>
+                                <circle cx="9.5" cy="7" r="3"/>
+                                <path d="M17 11a3 3 0 1 0 0-6"/>
+                                <path d="M21 20v-1.5a4 4 0 0 0-3-3.87"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Majburiy obuna kanallari</strong>
+                            <span>Ishtirokchi obuna bo'lishi kerak</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="channel-add-row">
+
+                        <input
+                            type="text"
+                            id="required-channel-input"
+                            class="text-input"
+                            placeholder="@kanal_nomi"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            id="add-required-channel"
+                            class="small-primary-button"
+                        >
+                            Qo'shish
+                        </button>
+
+                    </div>
+
+                    <div class="input-hint">
+                        @username · username · t.me/username · Telegram ID
+                    </div>
+
+
+                    <div
+                        id="required-channel-list"
+                        class="resolved-list"
+                    ></div>
+
+                </div>
+
+
+                <!-- END CONDITION -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="8"/>
+                                <path d="M12 8v4l3 2"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Tugash sharti</strong>
+                            <span>Konkurs qachon tugaydi</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="segmented-control">
+
+                        <button
+                            type="button"
+                            class="segment active"
+                            id="end-type-time"
+                            data-end-type="time"
+                        >
+                            Vaqt
+                        </button>
+
+                        <button
+                            type="button"
+                            class="segment"
+                            id="end-type-limit"
+                            data-end-type="limit"
+                        >
+                            Ishtirokchilar soni
+                        </button>
+
+                    </div>
+
+
+                    <div id="end-time-field">
+
+                        <label class="field-label">
+                            Tugash vaqti
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="end-at"
+                            class="text-input"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="participant-limit-field"
+                        class="hidden"
+                    >
+
+                        <label class="field-label">
+                            Maksimal ishtirokchilar
+                        </label>
+
+                        <input
+                            type="number"
+                            id="participant-limit"
+                            class="text-input"
+                            min="1"
+                            placeholder="100"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- WINNERS -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/>
+                                <path d="M8 6H5v2a3 3 0 0 0 3 3M16 6h3v2a3 3 0 0 1-3 3"/>
+                                <path d="M12 13v4M8 20h8M10 17h4"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>G'oliblar soni</strong>
+                            <span>Nechta g'olib tanlanadi</span>
+                        </div>
+
+                    </div>
+
+
+                    <input
+                        type="number"
+                        id="winners-count"
+                        class="text-input"
+                        min="1"
+                        value="1"
+                        placeholder="1"
+                    >
+
+                </div>
+
+
+                <!-- BUTTON TEXT -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect
+                                    x="4"
+                                    y="6"
+                                    width="16"
+                                    height="12"
+                                    rx="3"
+                                />
+                                <path d="M8 12h8"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Ishtirok etish tugmasi</strong>
+                            <span>Kanal postidagi tugma matni</span>
+                        </div>
+
+                    </div>
+
+
+                    <input
+                        type="text"
+                        id="button-text"
+                        class="text-input"
+                        value="Ishtirok etish"
+                        maxlength="40"
+                    >
+
+                </div>
+
+
+                <!-- START -->
+                <div class="form-section">
+
+                    <div class="section-title">
+
+                        <div class="section-title-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="8"/>
+                                <path d="M12 8v4l3 2"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <strong>Boshlanish vaqti</strong>
+                            <span>Konkurs qachon ishga tushadi</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="start-options">
+
+                        <button
+                            type="button"
+                            class="start-option active"
+                            id="start-now-button"
+                            data-start-mode="now"
+                        >
+
+                            <span class="option-radio"></span>
+
+                            <span>
+                                <strong>Hozir boshlash</strong>
+                                <small>Konkurs darhol boshlanadi</small>
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="start-option"
+                            id="start-scheduled-button"
+                            data-start-mode="scheduled"
+                        >
+
+                            <span class="option-radio"></span>
+
+                            <span>
+                                <strong>Vaqtni belgilash</strong>
+                                <small>Kelajakdagi vaqtni tanlang</small>
+                            </span>
+
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="start-time-field"
+                        class="hidden"
+                    >
+
+                        <label class="field-label">
+                            Boshlanish vaqti
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="start-at"
+                            class="text-input"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- PREVIEW -->
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                        id="preview-contest"
+                    >
+
+                        <svg viewBox="0 0 24 24">
+                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/>
+                            <circle cx="12" cy="12" r="2.5"/>
+                        </svg>
+
+                        Preview ko'rish
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- MY CONTESTS -->
+        <section
+            class="page"
+            id="my-contests-page"
+            hidden
+        >
+
+            <div class="page-header">
+
+                <button
+                    class="back-icon-button"
+                    data-page="home"
+                    type="button"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+
+                <div class="page-header-icon purple-bg">
+                    <svg viewBox="0 0 24 24">
+                        <rect
+                            x="4"
+                            y="4"
+                            width="16"
+                            height="16"
+                            rx="3"
+                        />
+                        <path d="M8 9h8M8 13h8M8 17h5"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h2>Konkurslarim</h2>
+                    <p>Siz yaratgan konkurslar</p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="my-contests-list"
+                class="contest-list"
+            ></div>
+
+
+            <div
+                id="my-contests-empty"
+                class="empty-state"
+            >
+
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M5 5h14v14H5z"/>
+                        <path d="M8 12h8M12 8v8"/>
+                    </svg>
+                </div>
+
+                <h3>Hali konkurs yo'q</h3>
+
+                <p>
+                    Birinchi konkursingizni yaratib
+                    ko'ring
+                </p>
+
+                <button
+                    class="primary-button compact-button"
+                    data-page="create"
+                    type="button"
+                >
+                    Konkurs yaratish
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- PROFILE -->
+        <section
+            class="page"
+            id="profile-page"
+            hidden
+        >
+
+            <div class="page-header">
+
+                <button
+                    class="back-icon-button"
+                    data-page="home"
+                    type="button"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+
+                <div class="page-header-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="3"/>
+                        <path d="M5 20a7 7 0 0 1 14 0"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h2>Profil</h2>
+                    <p>Telegram profilingiz</p>
+                </div>
+
+            </div>
+
+
+            <div class="profile-card">
+
+                <div
+                    id="profile-avatar"
+                    class="profile-avatar"
+                >
+                    U
+                </div>
+
+                <img
+                    id="profile-avatar-image"
+                    class="profile-avatar-image hidden"
+                    src=""
+                    alt="Profil rasmi"
+                >
+
+                <div class="profile-information">
+
+                    <strong id="profile-name">
+                        Foydalanuvchi
+                    </strong>
+
+                    <span id="profile-username">
+                        @username
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- HELP -->
+        <section
+            class="page"
+            id="help-page"
+            hidden
+        >
+
+            <div class="page-header">
+
+                <button
+                    class="back-icon-button"
+                    data-page="home"
+                    type="button"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+
+                <div class="page-header-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.2-1.7 2.7"/>
+                        <path d="M12 17h.01"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h2>Yordam</h2>
+                    <p>Konkurs_uzbot haqida</p>
+                </div>
+
+            </div>
+
+
+            <div class="help-list">
+
+                <button
+                    class="help-card"
+                    data-help="create"
+                    type="button"
+                >
+
+                    <span class="help-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                    </span>
+
+                    <span>
+                        <strong>Konkurs yaratish</strong>
+                        <small>Konkurs qanday yaratiladi</small>
+                    </span>
+
+                    <svg class="help-arrow" viewBox="0 0 24 24">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                </button>
+
+
+                <button
+                    class="help-card"
+                    data-help="participation"
+                    type="button"
+                >
+
+                    <span class="help-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 4.5 17.8 19c-.24 1.03-.84 1.29-1.7.8l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.34-4.78 8.7-7.86c.38-.34-.08-.53-.59-.19L6.01 12.82l-4.62-1.45c-1-.31-1.02-1 .21-1.48L19.65 3.1C20.56 2.77 21.36 3.3 21 4.5Z"/>
+                        </svg>
+                    </span>
+
+                    <span>
+                        <strong>Konkursda qatnashish</strong>
+                        <small>Ishtirok etish tartibi</small>
+                    </span>
+
+                    <svg class="help-arrow" viewBox="0 0 24 24">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                </button>
+
+
+                <button
+                    class="help-card"
+                    data-help="winners"
+                    type="button"
+                >
+
+                    <span class="help-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/>
+                            <path d="M8 6H5v2a3 3 0 0 0 3 3M16 6h3v2a3 3 0 0 1-3 3"/>
+                            <path d="M12 13v4M8 20h8"/>
+                        </svg>
+                    </span>
+
+                    <span>
+                        <strong>G'oliblar</strong>
+                        <small>G'oliblar qanday tanlanadi</small>
+                    </span>
+
+                    <svg class="help-arrow" viewBox="0 0 24 24">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                </button>
+
+
+                <button
+                    class="help-card"
+                    data-help="faq"
+                    type="button"
+                >
+
+                    <span class="help-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.2-1.7 2.7"/>
+                            <path d="M12 17h.01"/>
+                        </svg>
+                    </span>
+
+                    <span>
+                        <strong>FAQ</strong>
+                        <small>Ko'p beriladigan savollar</small>
+                    </span>
+
+                    <svg class="help-arrow" viewBox="0 0 24 24">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                </button>
+
+
+                <button
+                    class="help-card"
+                    data-help="admin"
+                    type="button"
+                >
+
+                    <span class="help-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="8" r="3"/>
+                            <path d="M5 20a7 7 0 0 1 14 0"/>
+                        </svg>
+                    </span>
+
+                    <span>
+                        <strong>Admin bilan bog'lanish</strong>
+                        <small>Yordam olish</small>
+                    </span>
+
+                    <svg class="help-arrow" viewBox="0 0 24 24">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- PREVIEW MODAL -->
+    <div
+        id="preview-modal"
+        class="modal-overlay hidden"
+    >
+
+        <div class="preview-modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <div class="modal-eyebrow">
+                        CONTEST PREVIEW
+                    </div>
+
+                    <h2>Konkurs preview</h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="close-preview"
+                    class="modal-close"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="m6 6 12 12M18 6 6 18"/>
+                    </svg>
+                </button>
+
+            </div>
+
+
+            <div
+                id="preview-content"
+                class="preview-content"
+            ></div>
+
+
+            <div class="preview-actions">
+
+                <button
+                    type="button"
+                    id="edit-preview"
+                    class="secondary-button"
+                >
+                    Tahrirlash
+                </button>
+
+                <button
+                    type="button"
+                    id="confirm-contest"
+                    class="primary-button"
+                >
+                    Konkursni boshlash
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOAST -->
+    <div
+        id="toast"
+        class="toast"
+    ></div>
+
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-navigation">
+
+        <button
+            type="button"
+            class="nav-item active"
+            data-page="home"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <path d="m3 11 9-7 9 7"/>
+                <path d="M5 10v9h14v-9"/>
+            </svg>
+
+            <span>Bosh sahifa</span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-item"
+            data-page="create"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+
+            <span>Yaratish</span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-item"
+            data-page="my-contests"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <rect
+                    x="4"
+                    y="4"
+                    width="16"
+                    height="16"
+                    rx="3"
+                />
+                <path d="M8 9h8M8 13h8M8 17h5"/>
+            </svg>
+
+            <span>Konkurslarim</span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-item"
+            data-page="profile"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="3"/>
+                <path d="M5 20a7 7 0 0 1 14 0"/>
+            </svg>
+
+            <span>Profil</span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-item"
+            data-page="help"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.2-1.7 2.7"/>
+                <path d="M12 17h.01"/>
+            </svg>
+
+            <span>Yordam</span>
+
+        </button>
+
+    </nav>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
