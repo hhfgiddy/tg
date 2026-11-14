@@ -24,6 +24,7 @@ from bot.handlers.help import (
 )
 
 from bot.scheduler import start_scheduler
+from bot.webapp.server import start_web_server
 
 
 async def main() -> None:
@@ -36,7 +37,9 @@ async def main() -> None:
 
     init_database()
 
-    bot = Bot(token=BOT_TOKEN)
+    bot = Bot(
+        token=BOT_TOKEN
+    )
 
     dp = Dispatcher()
 
@@ -51,11 +54,21 @@ async def main() -> None:
 
     start_scheduler(bot)
 
+    print("WEBAPP SERVER ISHLAYAPTI")
+
+    web_runner, web_site = await start_web_server(
+        bot=bot,
+        host="0.0.0.0",
+        port=8080,
+    )
+
     print("POLLING BOSHLAYAPTI")
 
     try:
         await dp.start_polling(bot)
+
     finally:
+        await web_runner.cleanup()
         await bot.session.close()
 
 

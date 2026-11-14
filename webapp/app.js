@@ -13,7 +13,7 @@ if (tg) {
         tg.setHeaderColor("#080b16");
         tg.setBackgroundColor("#080b16");
     } catch (error) {
-        console.log("Telegram WebApp settings error", error);
+        console.log(error);
     }
 }
 
@@ -30,7 +30,8 @@ const pages = {
     help: document.getElementById("help-page"),
 };
 
-const contestForm = document.getElementById("contest-form");
+const contestForm =
+    document.getElementById("contest-form");
 
 const targetChannelInput =
     document.getElementById("target-channel-input");
@@ -145,7 +146,9 @@ let currentEndType = "time";
 
 let currentStartMode = "now";
 
-let selectedImageData = "";
+let selectedImageFile = null;
+
+let selectedImagePreviewUrl = "";
 
 let resolvedTargetChannel = null;
 
@@ -155,7 +158,50 @@ let previewContestData = null;
 
 let toastTimer = null;
 
-let contests = loadContests();
+
+/* =========================================
+   API
+========================================= */
+
+async function apiRequest(
+    path,
+    options = {}
+) {
+    const headers = {
+        ...(options.headers || {}),
+    };
+
+    if (tg?.initData) {
+        headers[
+            "X-Telegram-Init-Data"
+        ] = tg.initData;
+    }
+
+    const response = await fetch(
+        path,
+        {
+            ...options,
+            headers,
+        }
+    );
+
+    let data = null;
+
+    try {
+        data = await response.json();
+    } catch {
+        data = null;
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data?.error ||
+            `Server xatosi: ${response.status}`
+        );
+    }
+
+    return data;
+}
 
 
 /* =========================================
@@ -163,7 +209,6 @@ let contests = loadContests();
 ========================================= */
 
 function iconSvg(name) {
-
     const icons = {
 
         channel: `
@@ -250,7 +295,8 @@ function showPage(pageName) {
 
     Object.entries(pages).forEach(
         ([name, page]) => {
-            page.hidden = name !== pageName;
+            page.hidden =
+                name !== pageName;
         }
     );
 
@@ -261,30 +307,29 @@ function showPage(pageName) {
         .forEach((button) => {
 
             if (
-                button.classList.contains("nav-item")
+                button.classList.contains(
+                    "nav-item"
+                )
             ) {
                 button.classList.toggle(
                     "active",
-                    button.dataset.page === pageName
+                    button.dataset.page ===
+                    pageName
                 );
             }
-
         });
 
     if (pageName === "my-contests") {
-        renderMyContests();
+        loadMyContests();
     }
 
     if (tg) {
-
         try {
-
             if (pageName === "home") {
                 tg.BackButton.hide();
             } else {
                 tg.BackButton.show();
             }
-
         } catch (error) {
             console.log(error);
         }
@@ -307,17 +352,18 @@ document
     .querySelectorAll("[data-page]")
     .forEach((button) => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            const pageName =
-                button.dataset.page;
+                const pageName =
+                    button.dataset.page;
 
-            if (pageName) {
-                showPage(pageName);
+                if (pageName) {
+                    showPage(pageName);
+                }
             }
-
-        });
-
+        );
     });
 
 
@@ -347,10 +393,12 @@ if (tg) {
 
 function loadProfile() {
 
-    const user = getTelegramUser();
+    const user =
+        getTelegramUser();
 
     const firstName =
-        user.first_name || "Foydalanuvchi";
+        user.first_name ||
+        "Foydalanuvchi";
 
     const lastName =
         user.last_name || "";
@@ -393,7 +441,48 @@ function loadProfile() {
         profileAvatar.classList.remove(
             "hidden"
         );
+    }
+}
 
+
+/* =========================================
+   LOAD REAL PROFILE
+========================================= */
+
+async function loadRealProfile() {
+
+    try {
+
+        const data =
+            await apiRequest(
+                "/api/me"
+            );
+
+        if (!data?.user) {
+            return;
+        }
+
+        const user =
+            data.user;
+
+        const firstName =
+            user.first_name ||
+            "Foydalanuvchi";
+
+        profileName.textContent =
+            firstName;
+
+        profileUsername.textContent =
+            user.username
+                ? `@${user.username}`
+                : "Telegram foydalanuvchisi";
+
+    } catch (error) {
+
+        console.log(
+            "Profile API error:",
+            error
+        );
     }
 }
 
@@ -402,7 +491,9 @@ function loadProfile() {
    HAPTIC
 ========================================= */
 
-function haptic(type = "light") {
+function haptic(
+    type = "light"
+) {
 
     try {
 
@@ -411,10 +502,10 @@ function haptic(type = "light") {
             tg.HapticFeedback
         ) {
 
-            tg.HapticFeedback.impactOccurred(
-                type
-            );
-
+            tg.HapticFeedback
+                .impactOccurred(
+                    type
+                );
         }
 
     } catch (error) {
@@ -429,17 +520,25 @@ function haptic(type = "light") {
 
 function showToast(message) {
 
-    clearTimeout(toastTimer);
+    clearTimeout(
+        toastTimer
+    );
 
-    toast.textContent = message;
+    toast.textContent =
+        message;
 
-    toast.classList.add("show");
+    toast.classList.add(
+        "show"
+    );
 
-    toastTimer = setTimeout(() => {
+    toastTimer =
+        setTimeout(() => {
 
-        toast.classList.remove("show");
+            toast.classList.remove(
+                "show"
+            );
 
-    }, 2600);
+        }, 2800);
 }
 
 
@@ -449,16 +548,157 @@ function showToast(message) {
 
 function escapeHtml(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+}
+
+
+/* =========================================
+   DATE HELPERS
+========================================= */
+
+function pad(number) {
+
+    return String(number)
+        .padStart(2, "0");
+}
+
+
+function toLocalDateTimeInput(
+    date
+) {
+
+    return [
+        date.getFullYear(),
+        "-",
+        pad(
+            date.getMonth() + 1
+        ),
+        "-",
+        pad(
+            date.getDate()
+        ),
+        "T",
+        pad(
+            date.getHours()
+        ),
+        ":",
+        pad(
+            date.getMinutes()
+        ),
+    ].join("");
+}
+
+
+function formatDateTime(
+    value
+) {
+
+    if (!value) {
+        return "-";
+    }
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return "-";
+    }
+
+    return date.toLocaleString(
+        "uz-UZ",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }
+    );
+}
+
+
+function setDateDefaults() {
+
+    const now =
+        new Date();
+
+    const minimum =
+        toLocalDateTimeInput(
+            now
+        );
+
+    if (startAt) {
+        startAt.min =
+            minimum;
+    }
+
+    if (endAt) {
+        endAt.min =
+            minimum;
+    }
+
+    const oneHourLater =
+        new Date(
+            now.getTime() +
+            60 * 60 * 1000
+        );
+
+    if (
+        endAt &&
+        !endAt.value
+    ) {
+        endAt.value =
+            toLocalDateTimeInput(
+                oneHourLater
+            );
+    }
+
+    const tomorrow =
+        new Date(
+            now.getTime() +
+            24 * 60 * 60 * 1000
+        );
+
+    if (
+        startAt &&
+        !startAt.value
+    ) {
+        startAt.value =
+            toLocalDateTimeInput(
+                tomorrow
+            );
+    }
 }
 
 
@@ -466,7 +706,9 @@ function escapeHtml(value) {
    TELEGRAM TARGET NORMALIZER
 ========================================= */
 
-function normalizeTelegramTarget(value) {
+function normalizeTelegramTarget(
+    value
+) {
 
     if (!value) {
         return null;
@@ -480,15 +722,9 @@ function normalizeTelegramTarget(value) {
         return null;
     }
 
-
-    /*
-        HTTPS:
-        https://t.me/username
-        http://t.me/username
-    */
-
     if (
-        /^https?:\/\/t\.me\//i.test(raw)
+        /^https?:\/\/t\.me\//i
+            .test(raw)
     ) {
 
         try {
@@ -498,59 +734,54 @@ function normalizeTelegramTarget(value) {
 
             let username =
                 url.pathname
-                    .replace(/^\/+/, "")
-                    .replace(/\/+$/, "");
+                    .replace(
+                        /^\/+/,
+                        ""
+                    )
+                    .replace(
+                        /\/+$/,
+                        ""
+                    );
 
             if (
-                username &&
-                /^[A-Za-z0-9_]{5,32}$/.test(
-                    username
-                )
+                /^[A-Za-z0-9_]{5,32}$/
+                    .test(username)
             ) {
 
                 return {
                     type: "username",
                     username,
+                    original: raw,
                     key:
                         `username:${username.toLowerCase()}`,
-                    original: raw,
                 };
-
             }
 
-        } catch (error) {
+        } catch {
             return null;
         }
-
     }
 
-
-    /*
-        @username
-        username
-    */
+    if (
+        raw.startsWith("@")
+    ) {
+        raw =
+            raw.slice(1);
+    }
 
     if (
-        /^@?[A-Za-z0-9_]{5,32}$/.test(raw)
+        /^[A-Za-z0-9_]{5,32}$/
+            .test(raw)
     ) {
-
-        const username =
-            raw.replace(/^@/, "");
 
         return {
             type: "username",
-            username,
+            username: raw,
+            original: value,
             key:
-                `username:${username.toLowerCase()}`,
-            original: raw,
+                `username:${raw.toLowerCase()}`,
         };
-
     }
-
-
-    /*
-        Numeric Telegram ID
-    */
 
     if (
         /^-?\d+$/.test(raw)
@@ -559,10 +790,9 @@ function normalizeTelegramTarget(value) {
         return {
             type: "id",
             id: raw,
+            original: value,
             key: `id:${raw}`,
-            original: raw,
         };
-
     }
 
     return null;
@@ -570,68 +800,106 @@ function normalizeTelegramTarget(value) {
 
 
 /* =========================================
-   DEMO RESOLVER
+   REAL TARGET RESOLUTION
 ========================================= */
 
-function resolveTelegramTarget(value) {
+async function resolveTargetChannel() {
+
+    const value =
+        targetChannelInput.value.trim();
+
+    if (!value) {
+
+        resolvedTargetChannel =
+            null;
+
+        renderTargetChannelResult();
+
+        return false;
+    }
 
     const normalized =
-        normalizeTelegramTarget(value);
+        normalizeTelegramTarget(
+            value
+        );
 
     if (!normalized) {
-        return null;
+
+        resolvedTargetChannel =
+            null;
+
+        renderTargetChannelResult();
+
+        showToast(
+            "Telegram kanal formatini tekshiring"
+        );
+
+        return false;
     }
 
+    targetChannelResult.classList.remove(
+        "hidden"
+    );
 
-    /*
-        Bu DEMO resolver.
+    targetChannelResult.innerHTML = `
+        <div class="resolved-result-icon">
+            ${iconSvg("clock")}
+        </div>
 
-        Real backend ulanganda Telegram API
-        orqali haqiqiy kanal nomi / username
-        resolve qilinadi.
-    */
+        <div>
+            <strong>
+                Tekshirilmoqda...
+            </strong>
 
-    if (
-        normalized.type === "username"
-    ) {
+            <span>
+                Telegram kanal tekshirilmoqda
+            </span>
+        </div>
+    `;
 
-        const username =
-            normalized.username;
+    try {
 
-        return {
-            ...normalized,
+        const data =
+            await apiRequest(
+                "/api/resolve-target",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+                    body: JSON.stringify({
+                        value,
+                        purpose: "target",
+                    }),
+                }
+            );
 
-            title:
-                `@${username}`,
+        resolvedTargetChannel =
+            data.channel;
 
-            username:
-                `@${username}`,
+        renderTargetChannelResult();
 
-            display:
-                `@${username}`,
-        };
+        haptic("light");
 
+        return true;
+
+    } catch (error) {
+
+        resolvedTargetChannel =
+            null;
+
+        renderTargetChannelResult();
+
+        showToast(
+            error.message ||
+            "Kanalni tekshirishda xato"
+        );
+
+        return false;
     }
-
-
-    return {
-        ...normalized,
-
-        title:
-            `Telegram ID ${normalized.id}`,
-
-        username:
-            `ID: ${normalized.id}`,
-
-        display:
-            `Telegram ID ${normalized.id}`,
-    };
 }
 
-
-/* =========================================
-   TARGET CHANNEL RESOLUTION
-========================================= */
 
 function renderTargetChannelResult() {
 
@@ -641,16 +909,15 @@ function renderTargetChannelResult() {
             "hidden"
         );
 
-        targetChannelResult.innerHTML = "";
+        targetChannelResult.innerHTML =
+            "";
 
         return;
     }
 
-
     targetChannelResult.classList.remove(
         "hidden"
     );
-
 
     targetChannelResult.innerHTML = `
 
@@ -667,7 +934,9 @@ function renderTargetChannelResult() {
 
             <span>
                 ${escapeHtml(
-                    resolvedTargetChannel.username
+                    resolvedTargetChannel.username ||
+                    resolvedTargetChannel.display ||
+                    ""
                 )}
             </span>
         </div>
@@ -676,53 +945,10 @@ function renderTargetChannelResult() {
 }
 
 
-function resolveTargetChannel() {
-
-    const value =
-        targetChannelInput.value;
-
-    if (!value.trim()) {
-
-        resolvedTargetChannel = null;
-
-        renderTargetChannelResult();
-
-        return;
-    }
-
-
-    const resolved =
-        resolveTelegramTarget(value);
-
-
-    if (!resolved) {
-
-        resolvedTargetChannel = null;
-
-        renderTargetChannelResult();
-
-        showToast(
-            "Telegram kanal formatini tekshiring"
-        );
-
-        return;
-    }
-
-
-    resolvedTargetChannel =
-        resolved;
-
-    renderTargetChannelResult();
-
-    haptic("light");
-}
-
-
 targetChannelInput.addEventListener(
     "blur",
     resolveTargetChannel
 );
-
 
 targetChannelInput.addEventListener(
     "change",
@@ -736,95 +962,107 @@ targetChannelInput.addEventListener(
 
 function renderRequiredChannels() {
 
-    if (!requiredChannels.length) {
+    if (
+        !requiredChannels.length
+    ) {
 
-        requiredChannelList.innerHTML = "";
+        requiredChannelList.innerHTML =
+            "";
 
         return;
     }
 
-
     requiredChannelList.innerHTML =
         requiredChannels
-            .map((channel, index) => {
+            .map(
+                (
+                    channel,
+                    index
+                ) => {
 
-                return `
+                    return `
 
-                    <div class="channel-chip">
+                        <div class="channel-chip">
 
-                        <div class="channel-chip-icon">
-                            ${iconSvg("channel")}
+                            <div class="channel-chip-icon">
+                                ${iconSvg("channel")}
+                            </div>
+
+                            <div class="channel-chip-info">
+
+                                <strong>
+                                    ${escapeHtml(
+                                        channel.title
+                                    )}
+                                </strong>
+
+                                <span>
+                                    ${escapeHtml(
+                                        channel.username ||
+                                        channel.display ||
+                                        ""
+                                    )}
+                                </span>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="channel-remove"
+                                data-remove-channel="${index}"
+                                aria-label="O'chirish"
+                            >
+                                ${iconSvg("close")}
+                            </button>
+
                         </div>
 
-                        <div class="channel-chip-info">
-
-                            <strong>
-                                ${escapeHtml(
-                                    channel.title
-                                )}
-                            </strong>
-
-                            <span>
-                                ${escapeHtml(
-                                    channel.username
-                                )}
-                            </span>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            class="channel-remove"
-                            data-remove-channel="${index}"
-                            aria-label="O'chirish"
-                        >
-                            ${iconSvg("close")}
-                        </button>
-
-                    </div>
-
-                `;
-
-            })
+                    `;
+                }
+            )
             .join("");
-
 
     requiredChannelList
         .querySelectorAll(
             "[data-remove-channel]"
         )
-        .forEach((button) => {
+        .forEach(
+            (button) => {
 
-            button.addEventListener(
-                "click",
-                () => {
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                    const index =
-                        Number(
-                            button.dataset
-                                .removeChannel
+                        const index =
+                            Number(
+                                button.dataset
+                                    .removeChannel
+                            );
+
+                        requiredChannels
+                            .splice(
+                                index,
+                                1
+                            );
+
+                        renderRequiredChannels();
+
+                        haptic(
+                            "light"
                         );
-
-                    requiredChannels.splice(
-                        index,
-                        1
-                    );
-
-                    renderRequiredChannels();
-
-                    haptic("light");
-
-                }
-            );
-
-        });
+                    }
+                );
+            }
+        );
 }
 
 
-function addRequiredChannel() {
+async function addRequiredChannel() {
 
     const value =
-        requiredChannelInput.value.trim();
+        requiredChannelInput
+            .value
+            .trim();
 
     if (!value) {
 
@@ -835,12 +1073,12 @@ function addRequiredChannel() {
         return;
     }
 
+    const normalized =
+        normalizeTelegramTarget(
+            value
+        );
 
-    const resolved =
-        resolveTelegramTarget(value);
-
-
-    if (!resolved) {
+    if (!normalized) {
 
         showToast(
             "Telegram kanal formatini tekshiring"
@@ -849,13 +1087,12 @@ function addRequiredChannel() {
         return;
     }
 
-
     const exists =
         requiredChannels.some(
             (channel) =>
-                channel.key === resolved.key
+                channel.key ===
+                normalized.key
         );
-
 
     if (exists) {
 
@@ -866,17 +1103,71 @@ function addRequiredChannel() {
         return;
     }
 
+    addRequiredChannelButton.disabled =
+        true;
 
-    requiredChannels.push(
-        resolved
-    );
+    try {
 
+        const data =
+            await apiRequest(
+                "/api/resolve-target",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+                    body: JSON.stringify({
+                        value,
+                        purpose: "required",
+                    }),
+                }
+            );
 
-    requiredChannelInput.value = "";
+        const channel =
+            data.channel;
 
-    renderRequiredChannels();
+        const alreadyExists =
+            requiredChannels.some(
+                (item) =>
+                    item.channel_id ===
+                    channel.channel_id
+            );
 
-    haptic("medium");
+        if (alreadyExists) {
+
+            showToast(
+                "Bu kanal allaqachon qo'shilgan"
+            );
+
+            return;
+        }
+
+        requiredChannels.push(
+            channel
+        );
+
+        requiredChannelInput.value =
+            "";
+
+        renderRequiredChannels();
+
+        haptic(
+            "medium"
+        );
+
+    } catch (error) {
+
+        showToast(
+            error.message ||
+            "Kanalni qo'shib bo'lmadi"
+        );
+
+    } finally {
+
+        addRequiredChannelButton.disabled =
+            false;
+    }
 }
 
 
@@ -890,14 +1181,15 @@ requiredChannelInput.addEventListener(
     "keydown",
     (event) => {
 
-        if (event.key === "Enter") {
+        if (
+            event.key ===
+            "Enter"
+        ) {
 
             event.preventDefault();
 
             addRequiredChannel();
-
         }
-
     }
 );
 
@@ -917,7 +1209,6 @@ postImageInput.addEventListener(
             return;
         }
 
-
         if (
             !file.type.startsWith(
                 "image/"
@@ -928,34 +1219,53 @@ postImageInput.addEventListener(
                 "Faqat rasm fayl tanlang"
             );
 
-            postImageInput.value = "";
+            postImageInput.value =
+                "";
 
             return;
         }
 
+        if (
+            file.size >
+            10 * 1024 * 1024
+        ) {
 
-        const reader =
-            new FileReader();
-
-
-        reader.onload = () => {
-
-            selectedImageData =
-                reader.result;
-
-            postImagePreview.src =
-                selectedImageData;
-
-            imagePreviewBox.classList.remove(
-                "hidden"
+            showToast(
+                "Rasm hajmi 10 MB dan oshmasin"
             );
 
-            haptic("medium");
+            postImageInput.value =
+                "";
 
-        };
+            return;
+        }
 
+        selectedImageFile =
+            file;
 
-        reader.readAsDataURL(file);
+        if (
+            selectedImagePreviewUrl
+        ) {
+            URL.revokeObjectURL(
+                selectedImagePreviewUrl
+            );
+        }
+
+        selectedImagePreviewUrl =
+            URL.createObjectURL(
+                file
+            );
+
+        postImagePreview.src =
+            selectedImagePreviewUrl;
+
+        imagePreviewBox.classList.remove(
+            "hidden"
+        );
+
+        haptic(
+            "medium"
+        );
     }
 );
 
@@ -964,18 +1274,34 @@ removeImageButton.addEventListener(
     "click",
     () => {
 
-        selectedImageData = "";
+        selectedImageFile =
+            null;
 
-        postImageInput.value = "";
+        if (
+            selectedImagePreviewUrl
+        ) {
 
-        postImagePreview.src = "";
+            URL.revokeObjectURL(
+                selectedImagePreviewUrl
+            );
+
+            selectedImagePreviewUrl =
+                "";
+        }
+
+        postImageInput.value =
+            "";
+
+        postImagePreview.src =
+            "";
 
         imagePreviewBox.classList.add(
             "hidden"
         );
 
-        haptic("light");
-
+        haptic(
+            "light"
+        );
     }
 );
 
@@ -984,15 +1310,15 @@ removeImageButton.addEventListener(
    END TYPE
 ========================================= */
 
-function setEndType(type) {
+function setEndType(
+    type
+) {
 
     currentEndType =
         type;
 
-
     const isTime =
         type === "time";
-
 
     endTypeTime.classList.toggle(
         "active",
@@ -1004,7 +1330,6 @@ function setEndType(type) {
         !isTime
     );
 
-
     endTimeField.classList.toggle(
         "hidden",
         !isTime
@@ -1014,20 +1339,26 @@ function setEndType(type) {
         "hidden",
         isTime
     );
-
-    haptic("light");
 }
 
 
 endTypeTime.addEventListener(
     "click",
-    () => setEndType("time")
+    () => {
+        setEndType(
+            "time"
+        );
+    }
 );
 
 
 endTypeLimit.addEventListener(
     "click",
-    () => setEndType("limit")
+    () => {
+        setEndType(
+            "limit"
+        );
+    }
 );
 
 
@@ -1035,15 +1366,15 @@ endTypeLimit.addEventListener(
    START MODE
 ========================================= */
 
-function setStartMode(mode) {
+function setStartMode(
+    mode
+) {
 
     currentStartMode =
         mode;
 
-
     const isNow =
         mode === "now";
-
 
     startNowButton.classList.toggle(
         "active",
@@ -1055,175 +1386,44 @@ function setStartMode(mode) {
         !isNow
     );
 
-
     startTimeField.classList.toggle(
         "hidden",
         isNow
     );
-
-
-    haptic("light");
 }
 
 
 startNowButton.addEventListener(
     "click",
-    () => setStartMode("now")
+    () => {
+
+        setStartMode(
+            "now"
+        );
+    }
 );
 
 
 startScheduledButton.addEventListener(
     "click",
-    () => setStartMode("scheduled")
+    () => {
+
+        setStartMode(
+            "scheduled"
+        );
+    }
 );
 
 
 /* =========================================
-   DATETIME HELPERS
-========================================= */
-
-function padNumber(number) {
-
-    return String(number)
-        .padStart(2, "0");
-}
-
-
-function toLocalDateTimeInput(
-    date
-) {
-
-    const year =
-        date.getFullYear();
-
-    const month =
-        padNumber(
-            date.getMonth() + 1
-        );
-
-    const day =
-        padNumber(
-            date.getDate()
-        );
-
-    const hours =
-        padNumber(
-            date.getHours()
-        );
-
-    const minutes =
-        padNumber(
-            date.getMinutes()
-        );
-
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-
-function setDateDefaults() {
-
-    const now =
-        new Date();
-
-
-    const startDefault =
-        new Date(
-            now.getTime() +
-            30 * 60 * 1000
-        );
-
-
-    const endDefault =
-        new Date(
-            now.getTime() +
-            24 * 60 * 60 * 1000
-        );
-
-
-    const minimum =
-        toLocalDateTimeInput(
-            now
-        );
-
-
-    startAt.min =
-        minimum;
-
-    endAt.min =
-        minimum;
-
-
-    if (!startAt.value) {
-
-        startAt.value =
-            toLocalDateTimeInput(
-                startDefault
-            );
-
-    }
-
-
-    if (!endAt.value) {
-
-        endAt.value =
-            toLocalDateTimeInput(
-                endDefault
-            );
-
-    }
-}
-
-
-/* =========================================
-   DATE FORMAT
-========================================= */
-
-function formatDateTime(
-    value
-) {
-
-    if (!value) {
-        return "-";
-    }
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-        return value;
-    }
-
-
-    return new Intl.DateTimeFormat(
-        "uz-UZ",
-        {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        }
-    ).format(date);
-}
-
-
-/* =========================================
-   VALIDATION
+   VALIDATE
 ========================================= */
 
 function validateContestForm() {
 
-    resolveTargetChannel();
-
-
-    if (!resolvedTargetChannel) {
+    if (
+        !targetChannelInput.value.trim()
+    ) {
 
         showToast(
             "Konkurs kanalini kiriting"
@@ -1234,10 +1434,22 @@ function validateContestForm() {
         return false;
     }
 
+    if (
+        !resolvedTargetChannel
+    ) {
+
+        showToast(
+            "Avval konkurs kanalini tekshiring"
+        );
+
+        targetChannelInput.focus();
+
+        return false;
+    }
 
     if (
         !postText.value.trim() &&
-        !selectedImageData
+        !selectedImageFile
     ) {
 
         showToast(
@@ -1249,27 +1461,17 @@ function validateContestForm() {
         return false;
     }
 
-
-    if (!requiredChannels.length) {
-
-        showToast(
-            "Kamida 1 ta majburiy kanal qo'shing"
-        );
-
-        requiredChannelInput.focus();
-
-        return false;
-    }
-
+    
 
     const winners =
         Number(
             winnersCount.value
         );
 
-
     if (
-        !Number.isInteger(winners) ||
+        !Number.isInteger(
+            winners
+        ) ||
         winners < 1
     ) {
 
@@ -1282,6 +1484,148 @@ function validateContestForm() {
         return false;
     }
 
+    if (
+        currentEndType ===
+        "limit"
+    ) {
+
+        const limit =
+            Number(
+                participantLimit.value
+            );
+
+        if (
+            !Number.isInteger(
+                limit
+            ) ||
+            limit < 1
+        ) {
+
+            showToast(
+                "Ishtirokchilar limitini kiriting"
+            );
+
+            participantLimit.focus();
+
+            return false;
+        }
+
+        if (
+            limit < winners
+        ) {
+
+            showToast(
+                "Limit g'oliblar sonidan kam bo'lmasin"
+            );
+
+            participantLimit.focus();
+
+            return false;
+        }
+
+    } else {
+
+        if (
+            !endAt.value
+        ) {
+
+            showToast(
+                "Tugash vaqtini tanlang"
+            );
+
+            endAt.focus();
+
+            return false;
+        }
+
+        const endDate =
+            new Date(
+                endAt.value
+            );
+
+        if (
+            Number.isNaN(
+                endDate.getTime()
+            ) ||
+            endDate <=
+            new Date()
+        ) {
+
+            showToast(
+                "Tugash vaqti kelajakda bo'lishi kerak"
+            );
+
+            endAt.focus();
+
+            return false;
+        }
+    }
+
+    if (
+        currentStartMode ===
+        "scheduled"
+    ) {
+
+        if (
+            !startAt.value
+        ) {
+
+            showToast(
+                "Boshlanish vaqtini tanlang"
+            );
+
+            startAt.focus();
+
+            return false;
+        }
+
+        const startDate =
+            new Date(
+                startAt.value
+            );
+
+        if (
+            Number.isNaN(
+                startDate.getTime()
+            ) ||
+            startDate <=
+            new Date()
+        ) {
+
+            showToast(
+                "Boshlanish vaqti kelajakda bo'lishi kerak"
+            );
+
+            startAt.focus();
+
+            return false;
+        }
+
+        if (
+            currentEndType ===
+            "time"
+        ) {
+
+            const endDate =
+                new Date(
+                    endAt.value
+                );
+
+            if (
+                startDate >=
+                endDate
+            ) {
+
+                showToast(
+                    "Boshlanish vaqti tugashdan oldin bo'lishi kerak"
+                );
+
+                startAt.focus();
+
+                return false;
+            }
+        }
+    }
 
     if (
         !buttonText.value.trim()
@@ -1296,158 +1640,12 @@ function validateContestForm() {
         return false;
     }
 
-
-    if (
-        currentEndType === "time"
-    ) {
-
-        if (!endAt.value) {
-
-            showToast(
-                "Tugash vaqtini tanlang"
-            );
-
-            endAt.focus();
-
-            return false;
-        }
-
-
-        const endDate =
-            new Date(
-                endAt.value
-            );
-
-
-        const now =
-            new Date();
-
-
-        if (
-            endDate <= now
-        ) {
-
-            showToast(
-                "Tugash vaqti kelajakda bo'lishi kerak"
-            );
-
-            endAt.focus();
-
-            return false;
-        }
-
-    } else {
-
-        const limit =
-            Number(
-                participantLimit.value
-            );
-
-
-        if (
-            !Number.isInteger(limit) ||
-            limit < 1
-        ) {
-
-            showToast(
-                "Ishtirokchilar limitini kiriting"
-            );
-
-            participantLimit.focus();
-
-            return false;
-        }
-
-
-        if (limit < winners) {
-
-            showToast(
-                "Ishtirokchilar soni g'oliblardan kam bo'lmasin"
-            );
-
-            participantLimit.focus();
-
-            return false;
-        }
-
-    }
-
-
-    if (
-        currentStartMode === "scheduled"
-    ) {
-
-        if (!startAt.value) {
-
-            showToast(
-                "Boshlanish vaqtini tanlang"
-            );
-
-            startAt.focus();
-
-            return false;
-        }
-
-
-        const startDate =
-            new Date(
-                startAt.value
-            );
-
-
-        const now =
-            new Date();
-
-
-        if (
-            startDate <= now
-        ) {
-
-            showToast(
-                "Boshlanish vaqti kelajakda bo'lishi kerak"
-            );
-
-            startAt.focus();
-
-            return false;
-        }
-
-
-        if (
-            currentEndType === "time" &&
-            endAt.value
-        ) {
-
-            const endDate =
-                new Date(
-                    endAt.value
-                );
-
-
-            if (
-                startDate >= endDate
-            ) {
-
-                showToast(
-                    "Boshlanish vaqti tugash vaqtidan oldin bo'lishi kerak"
-                );
-
-                startAt.focus();
-
-                return false;
-            }
-
-        }
-
-    }
-
-
     return true;
 }
 
 
 /* =========================================
-   BUILD DATA
+   BUILD PREVIEW DATA
 ========================================= */
 
 function buildContestData() {
@@ -1459,27 +1657,21 @@ function buildContestData() {
                 startAt.value
             );
 
-
-    const data = {
-
-        id:
-            Date.now(),
+    return {
 
         targetChannel:
-            {
-                ...resolvedTargetChannel
-            },
+            resolvedTargetChannel,
 
         postText:
             postText.value.trim(),
 
         image:
-            selectedImageData,
+            selectedImagePreviewUrl,
 
         requiredChannels:
             requiredChannels.map(
                 (channel) => ({
-                    ...channel
+                    ...channel,
                 })
             ),
 
@@ -1487,12 +1679,14 @@ function buildContestData() {
             currentEndType,
 
         endAt:
-            currentEndType === "time"
+            currentEndType ===
+            "time"
                 ? endAt.value
                 : null,
 
         participantLimit:
-            currentEndType === "limit"
+            currentEndType ===
+            "limit"
                 ? Number(
                     participantLimit.value
                 )
@@ -1512,21 +1706,7 @@ function buildContestData() {
         startAt:
             startDate.toISOString(),
 
-        participants:
-            0,
-
-        status:
-            currentStartMode === "now"
-                ? "Faol"
-                : "Rejalashtirilgan",
-
-        createdAt:
-            new Date().toISOString(),
-
     };
-
-
-    return data;
 }
 
 
@@ -1534,23 +1714,25 @@ function buildContestData() {
    PREVIEW
 ========================================= */
 
-function renderPreview(data) {
+function renderPreview(
+    data
+) {
 
     previewContestData =
         data;
-
 
     const imageHtml =
         data.image
             ? `
                 <img
                     class="preview-post-image"
-                    src="${data.image}"
+                    src="${escapeHtml(
+                        data.image
+                    )}"
                     alt="Konkurs rasmi"
                 >
             `
             : "";
-
 
     const postTextHtml =
         data.postText
@@ -1567,22 +1749,21 @@ function renderPreview(data) {
                 </div>
             `;
 
-
     const startText =
-        data.startMode === "now"
+        data.startMode ===
+        "now"
             ? "Hozir"
             : formatDateTime(
                 data.startAt
             );
 
-
     const endText =
-        data.endType === "time"
+        data.endType ===
+        "time"
             ? formatDateTime(
                 data.endAt
             )
             : `${data.participantLimit} ta ishtirokchi`;
-
 
     const requiredChannelsHtml =
         data.requiredChannels
@@ -1590,17 +1771,16 @@ function renderPreview(data) {
                 (channel) => `
                     <span class="preview-channel-chip">
                         ${escapeHtml(
-                            channel.username
+                            channel.username ||
+                            channel.display ||
+                            channel.title
                         )}
                     </span>
                 `
             )
             .join("");
 
-
     previewContent.innerHTML = `
-
-        <!-- TELEGRAM POST MOCK -->
 
         <div class="preview-post">
 
@@ -1615,6 +1795,7 @@ function renderPreview(data) {
                     </div>
 
                     <div>
+
                         <strong>
                             ${escapeHtml(
                                 data.targetChannel.title
@@ -1624,13 +1805,12 @@ function renderPreview(data) {
                         <span>
                             Konkurs kanali
                         </span>
+
                     </div>
 
                 </div>
 
-
                 ${postTextHtml}
-
 
                 <button
                     type="button"
@@ -1645,8 +1825,6 @@ function renderPreview(data) {
 
         </div>
 
-
-        <!-- DETAILS -->
 
         <div class="preview-info-grid">
 
@@ -1718,7 +1896,9 @@ function renderPreview(data) {
 
                 <span class="preview-channel-chip">
                     ${escapeHtml(
-                        data.targetChannel.username
+                        data.targetChannel.username ||
+                        data.targetChannel.display ||
+                        data.targetChannel.title
                     )}
                 </span>
 
@@ -1743,30 +1923,28 @@ function renderPreview(data) {
 
     `;
 
-
     previewModal.classList.remove(
         "hidden"
     );
 
-
     document.body.style.overflow =
         "hidden";
 
-
-    haptic("medium");
+    haptic(
+        "medium"
+    );
 }
 
 
 /* =========================================
-   PREVIEW FORM SUBMIT
+   FORM SUBMIT
 ========================================= */
 
 contestForm.addEventListener(
     "submit",
-    (event) => {
+    async (event) => {
 
         event.preventDefault();
-
 
         if (
             !validateContestForm()
@@ -1774,13 +1952,19 @@ contestForm.addEventListener(
             return;
         }
 
+        const channelResolved =
+            await resolveTargetChannel();
+
+        if (!channelResolved) {
+            return;
+        }
 
         const data =
             buildContestData();
 
-
-        renderPreview(data);
-
+        renderPreview(
+            data
+        );
     }
 );
 
@@ -1798,7 +1982,9 @@ function closePreview() {
     document.body.style.overflow =
         "";
 
-    haptic("light");
+    haptic(
+        "light"
+    );
 }
 
 
@@ -1822,79 +2008,114 @@ previewModal.addEventListener(
             event.target ===
             previewModal
         ) {
-
             closePreview();
-
         }
-
     }
 );
 
 
 /* =========================================
-   LOCAL STORAGE
+   SEND CONTEST TO BACKEND
 ========================================= */
 
-function loadContests() {
+async function createContestOnBackend(
+    data
+) {
 
-    try {
+    const formData =
+        new FormData();
 
-        const saved =
-            localStorage.getItem(
-                "konkurs_uzbot_contests"
-            );
+    formData.append(
+        "target_channel",
+        targetChannelInput.value.trim()
+    );
 
+    formData.append(
+        "post_text",
+        data.postText
+    );
 
-        if (!saved) {
-            return [];
-        }
+    formData.append(
+        "required_channels",
+        JSON.stringify(
+            data.requiredChannels.map(
+                (channel) => ({
+                    original:
+                        channel.username ||
+                        channel.display ||
+                        channel.title,
+                })
+            )
+        )
+    );
 
+    formData.append(
+        "end_type",
+        data.endType === "limit"
+            ? "participants"
+            : "time"
+    );
 
-        const parsed =
-            JSON.parse(saved);
+    if (
+        data.endType ===
+        "time"
+    ) {
 
-
-        if (
-            !Array.isArray(parsed)
-        ) {
-            return [];
-        }
-
-
-        return parsed;
-
-    } catch (error) {
-
-        console.log(
-            "Contest load error",
-            error
+        formData.append(
+            "end_at",
+            data.endAt
         );
 
-        return [];
+    } else {
 
-    }
-}
-
-
-function saveContests() {
-
-    try {
-
-        localStorage.setItem(
-            "konkurs_uzbot_contests",
-            JSON.stringify(
-                contests
+        formData.append(
+            "participant_limit",
+            String(
+                data.participantLimit
             )
         );
-
-    } catch (error) {
-
-        console.log(
-            "Contest save error",
-            error
-        );
-
     }
+
+    formData.append(
+        "winners_count",
+        String(
+            data.winnersCount
+        )
+    );
+
+    formData.append(
+        "button_text",
+        data.buttonText
+    );
+
+    formData.append(
+        "start_mode",
+        data.startMode
+    );
+
+    formData.append(
+        "start_at",
+        data.startAt
+    );
+
+    if (
+        selectedImageFile
+    ) {
+
+        formData.append(
+            "image",
+            selectedImageFile,
+            selectedImageFile.name
+        );
+    }
+
+    return await apiRequest(
+        "/api/contests",
+        {
+            method: "POST",
+            body: formData,
+        }
+    );
 }
 
 
@@ -1904,46 +2125,77 @@ function saveContests() {
 
 confirmContestButton.addEventListener(
     "click",
-    () => {
+    async () => {
 
-        if (!previewContestData) {
+        if (
+            !previewContestData
+        ) {
             return;
         }
 
+        confirmContestButton.disabled =
+            true;
 
-        contests.unshift(
-            previewContestData
-        );
+        const oldText =
+            confirmContestButton.textContent;
 
+        confirmContestButton.textContent =
+            "Saqlanmoqda...";
 
-        saveContests();
+        try {
 
-
-        closePreview();
-
-
-        resetContestForm();
-
-
-        showToast(
-            previewContestData.startMode === "now"
-                ? "Konkurs hozir boshlandi"
-                : "Konkurs rejalashtirildi"
-        );
-
-
-        setTimeout(
-            () => {
-                showPage(
-                    "my-contests"
+            const result =
+                await createContestOnBackend(
+                    previewContestData
                 );
-            },
-            500
-        );
 
+            closePreview();
 
-        previewContestData = null;
+            resetContestForm();
 
+            previewContestData =
+                null;
+
+            showToast(
+                result?.contest_id
+                    ? (
+                        previewContestData?.startMode ===
+                        "scheduled"
+                            ? "Konkurs rejalashtirildi"
+                            : "Konkurs yaratildi"
+                    )
+                    : "Konkurs yaratildi"
+            );
+
+            setTimeout(
+                () => {
+                    showPage(
+                        "my-contests"
+                    );
+                },
+                500
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Contest creation error:",
+                error
+            );
+
+            showToast(
+                error.message ||
+                "Konkurs yaratishda xato"
+            );
+
+        } finally {
+
+            confirmContestButton.disabled =
+                false;
+
+            confirmContestButton.textContent =
+                oldText;
+        }
     }
 );
 
@@ -1956,9 +2208,20 @@ function resetContestForm() {
 
     contestForm.reset();
 
+    selectedImageFile =
+        null;
 
-    selectedImageData =
-        "";
+    if (
+        selectedImagePreviewUrl
+    ) {
+
+        URL.revokeObjectURL(
+            selectedImagePreviewUrl
+        );
+
+        selectedImagePreviewUrl =
+            "";
+    }
 
     resolvedTargetChannel =
         null;
@@ -1966,13 +2229,11 @@ function resetContestForm() {
     requiredChannels =
         [];
 
-
     currentEndType =
         "time";
 
     currentStartMode =
         "now";
-
 
     imagePreviewBox.classList.add(
         "hidden"
@@ -1984,7 +2245,6 @@ function resetContestForm() {
     postImageInput.value =
         "";
 
-
     targetChannelResult.classList.add(
         "hidden"
     );
@@ -1992,16 +2252,17 @@ function resetContestForm() {
     targetChannelResult.innerHTML =
         "";
 
-
     renderRequiredChannels();
 
+    setEndType(
+        "time"
+    );
 
-    setEndType("time");
-
-    setStartMode("now");
+    setStartMode(
+        "now"
+    );
 
     setDateDefaults();
-
 
     winnersCount.value =
         "1";
@@ -2019,29 +2280,48 @@ function getContestStatus(
     contest
 ) {
 
-    if (
-        contest.status === "Faol"
-    ) {
+    const status =
+        String(
+            contest.status ||
+            ""
+        ).toLowerCase();
 
+    if (
+        status ===
+        "active"
+    ) {
         return "Faol";
     }
 
-
     if (
-        contest.status === "Yakunlangan"
+        status ===
+        "finished"
     ) {
-
         return "Yakunlangan";
     }
 
+    if (
+        status ===
+        "scheduled"
+    ) {
+        return "Rejalashtirilgan";
+    }
 
-    return "Rejalashtirilgan";
+    return (
+        contest.status ||
+        "Rejalashtirilgan"
+    );
 }
 
 
-function renderMyContests() {
+function renderMyContests(
+    contests
+) {
 
-    if (!contests.length) {
+    if (
+        !contests ||
+        !contests.length
+    ) {
 
         myContestsList.innerHTML =
             "";
@@ -2053,138 +2333,173 @@ function renderMyContests() {
         return;
     }
 
-
     myContestsEmpty.classList.add(
         "hidden"
     );
 
-
     myContestsList.innerHTML =
         contests
-            .map((contest) => {
+            .map(
+                (contest) => {
 
-                const status =
-                    getContestStatus(
-                        contest
-                    );
+                    const status =
+                        getContestStatus(
+                            contest
+                        );
 
+                    const endText =
+                        contest.end_type ===
+                        "time"
+                            ? formatDateTime(
+                                contest.end_at
+                            )
+                            : `${contest.participant_limit || 0} ta`;
 
-                const endText =
-                    contest.endType === "time"
-                        ? formatDateTime(
-                            contest.endAt
-                        )
-                        : `${contest.participantLimit} ta`;
+                    return `
 
+                        <div class="contest-card">
 
-                return `
+                            <div class="contest-card-top">
 
-                    <div class="contest-card">
+                                <div class="contest-mini-icon">
+                                    ${iconSvg("trophy")}
+                                </div>
 
-                        <div class="contest-card-top">
+                                <div class="contest-card-info">
 
-                            <div class="contest-mini-icon">
-                                ${iconSvg("trophy")}
-                            </div>
+                                    <strong>
+                                        ${escapeHtml(
+                                            contest.channel_title ||
+                                            contest.targetChannel?.title ||
+                                            "Konkurs"
+                                        )}
+                                    </strong>
 
+                                    <span>
+                                        ${escapeHtml(
+                                            contest.button_text ||
+                                            "Ishtirok etish"
+                                        )}
+                                    </span>
 
-                            <div class="contest-card-info">
+                                </div>
 
-                                <strong>
+                                <div class="contest-status">
                                     ${escapeHtml(
-                                        contest.targetChannel.title
+                                        status
                                     )}
-                                </strong>
-
-                                <span>
-                                    ${escapeHtml(
-                                        contest.buttonText
-                                    )}
-                                </span>
+                                </div>
 
                             </div>
 
 
-                            <div class="contest-status">
-                                ${escapeHtml(
-                                    status
-                                )}
-                            </div>
+                            <div class="contest-card-details">
 
-                        </div>
+                                <div class="contest-detail">
 
+                                    <span>
+                                        BOSHLANISHI
+                                    </span>
 
-                        <div class="contest-card-details">
-
-                            <div class="contest-detail">
-
-                                <span>
-                                    BOSHLANISHI
-                                </span>
-
-                                <strong>
-                                    ${
-                                        contest.startMode === "now"
-                                            ? "Hozir"
-                                            : escapeHtml(
-                                                formatDateTime(
-                                                    contest.startAt
-                                                )
+                                    <strong>
+                                        ${escapeHtml(
+                                            formatDateTime(
+                                                contest.start_at
                                             )
-                                    }
-                                </strong>
+                                        )}
+                                    </strong>
 
-                            </div>
-
-
-                            <div class="contest-detail">
-
-                                <span>
-                                    TUGASHI
-                                </span>
-
-                                <strong>
-                                    ${escapeHtml(
-                                        endText
-                                    )}
-                                </strong>
-
-                            </div>
+                                </div>
 
 
-                            <div class="contest-detail">
+                                <div class="contest-detail">
 
-                                <span>
-                                    G'OLIBLAR
-                                </span>
+                                    <span>
+                                        TUGASHI
+                                    </span>
 
-                                <strong>
-                                    ${contest.winnersCount} ta
-                                </strong>
+                                    <strong>
+                                        ${escapeHtml(
+                                            endText
+                                        )}
+                                    </strong>
 
-                            </div>
+                                </div>
 
 
-                            <div class="contest-detail">
+                                <div class="contest-detail">
 
-                                <span>
-                                    ISHTIROKCHILAR
-                                </span>
+                                    <span>
+                                        G'OLIBLAR
+                                    </span>
 
-                                <strong>
-                                    ${contest.participants || 0}
-                                </strong>
+                                    <strong>
+                                        ${contest.winners_count || 0} ta
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="contest-detail">
+
+                                    <span>
+                                        ISHTIROKCHILAR
+                                    </span>
+
+                                    <strong>
+                                        ${contest.participants || 0}
+                                    </strong>
+
+                                </div>
 
                             </div>
 
                         </div>
 
-                    </div>
-
-                `;
-
-            })
+                    `;
+                }
+            )
             .join("");
+}
+
+
+async function loadMyContests() {
+
+    try {
+
+        myContestsList.innerHTML = `
+            <div class="loading-state">
+                Yuklanmoqda...
+            </div>
+        `;
+
+        const data =
+            await apiRequest(
+                "/api/my-contests"
+            );
+
+        renderMyContests(
+            data.contests || []
+        );
+
+    } catch (error) {
+
+        console.error(
+            "My contests error:",
+            error
+        );
+
+        myContestsList.innerHTML = "";
+
+        myContestsEmpty.classList.remove(
+            "hidden"
+        );
+
+        showToast(
+            error.message ||
+            "Konkurslarni yuklab bo'lmadi"
+        );
+    }
 }
 
 
@@ -2197,8 +2512,8 @@ const helpTexts = {
     create: `
         <strong>Konkurs yaratish</strong>
         <br><br>
-        Konkurs kanalini kiriting
-        keyin post matni va kerak bo'lsa
+        Konkurs kanalini kiriting.
+        Keyin post matni va kerak bo'lsa
         gallerydan rasm tanlang.
         <br><br>
         Majburiy obuna kanallarini qo'shing
@@ -2217,8 +2532,6 @@ const helpTexts = {
         <br><br>
         Bot kerakli kanallarga obuna
         bo'lganingizni tekshiradi.
-        Barcha shartlar bajarilgach
-        konkursda qatnashasiz.
     `,
 
     winners: `
@@ -2227,9 +2540,6 @@ const helpTexts = {
         Konkurs yakunlangach bot
         ishtirokchilar orasidan tasodifiy
         g'oliblarni tanlaydi.
-        <br><br>
-        Bir foydalanuvchi bir konkursda
-        faqat bir marta ishtirok eta oladi.
     `,
 
     faq: `
@@ -2250,37 +2560,37 @@ const helpTexts = {
         bot administratori bilan
         Telegram orqali bog'lanishingiz mumkin.
     `,
-
 };
 
 
 document
-    .querySelectorAll("[data-help]")
-    .forEach((button) => {
+    .querySelectorAll(
+        "[data-help]"
+    )
+    .forEach(
+        (button) => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                const type =
-                    button.dataset.help;
+                    const type =
+                        button.dataset.help;
 
-                const text =
-                    helpTexts[type];
+                    const text =
+                        helpTexts[type];
 
-                if (!text) {
-                    return;
+                    if (!text) {
+                        return;
+                    }
+
+                    showHelpDetail(
+                        text
+                    );
                 }
-
-
-                showHelpDetail(
-                    text
-                );
-
-            }
-        );
-
-    });
+            );
+        }
+    );
 
 
 function showHelpDetail(
@@ -2289,7 +2599,6 @@ function showHelpDetail(
 
     const page =
         pages.help;
-
 
     page.innerHTML = `
 
@@ -2308,16 +2617,31 @@ function showHelpDetail(
             <div class="page-header-icon">
 
                 <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.2-1.7 2.7"/>
-                    <path d="M12 17h.01"/>
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                    />
+                    <path
+                        d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.2-1.7 2.7"
+                    />
+                    <path
+                        d="M12 17h.01"
+                    />
                 </svg>
 
             </div>
 
             <div>
-                <h2>Yordam</h2>
-                <p>Ma'lumot</p>
+
+                <h2>
+                    Yordam
+                </h2>
+
+                <p>
+                    Ma'lumot
+                </p>
+
             </div>
 
         </div>
@@ -2333,7 +2657,6 @@ function showHelpDetail(
 
     `;
 
-
     document
         .getElementById(
             "help-detail-back"
@@ -2341,19 +2664,9 @@ function showHelpDetail(
         .addEventListener(
             "click",
             () => {
-
-                restoreHelpPage();
-
+                location.reload();
             }
         );
-
-}
-
-
-function restoreHelpPage() {
-
-    location.reload();
-
 }
 
 
@@ -2365,14 +2678,10 @@ startAt.addEventListener(
     "change",
     () => {
 
-        const minimum =
+        startAt.min =
             toLocalDateTimeInput(
                 new Date()
             );
-
-        startAt.min =
-            minimum;
-
     }
 );
 
@@ -2381,14 +2690,10 @@ endAt.addEventListener(
     "change",
     () => {
 
-        const minimum =
+        endAt.min =
             toLocalDateTimeInput(
                 new Date()
             );
-
-        endAt.min =
-            minimum;
-
     }
 );
 
@@ -2397,21 +2702,21 @@ endAt.addEventListener(
    INITIALIZE
 ========================================= */
 
-function initializeApp() {
+async function initializeApp() {
 
     loadProfile();
 
     setDateDefaults();
 
-    setEndType("time");
+    setEndType(
+        "time"
+    );
 
-    setStartMode("now");
+    setStartMode(
+        "now"
+    );
 
     renderRequiredChannels();
-
-    renderMyContests();
-
-    showPage("home");
 
     if (tg) {
 
@@ -2420,9 +2725,15 @@ function initializeApp() {
         } catch (error) {
             console.log(error);
         }
-
     }
 
+    await loadRealProfile();
+
+    await loadMyContests();
+
+    showPage(
+        "home"
+    );
 }
 
 
